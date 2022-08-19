@@ -71,3 +71,9 @@ async def get_list_recipe_sort_name(current_user: User = Depends(get_current_use
 async def get_list_recipe_sort_name_with_pagination(number: int, current_user: User = Depends(get_current_user)):
     recipe_list = await get_list_recipes_sort_name_with_pagination(number)
     return recipe_list
+
+
+@router.post("/change_recipe/{recipe_id}")
+async def change_recipe(recipe: RecipeModel, recipe_id: int, current_user: User = Depends(get_current_user)):
+    recipe = await change_recipes(recipe, recipe_id, dict(current_user)['user_id'])
+    return recipe

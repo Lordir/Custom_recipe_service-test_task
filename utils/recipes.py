@@ -148,3 +148,24 @@ async def get_list_recipes_sort_name_with_pagination(number: int):
     else:
         recipes_list_new = recipes_list[(number - 1) * 10:number * 10]
         return recipes_list_new
+
+
+async def change_recipes(recipe: recipe_schema.RecipeModel, recipe_id: int, user_id: int):
+    data = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
+    recipe_list = [dict(result) for result in data]
+    for item in recipe_list:
+        if item['id'] == recipe_id and item['user_id'] == user_id:
+            item['title'] = recipe.title
+            item['type_dish'] = recipe.type_dish
+            item['description'] = recipe.description
+            item['cooking_steps'] = recipe.cooking_steps
+            item['photo'] = recipe.photo
+            item['updated_on'] = func.now()
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not your recipe",
+            )
+    recipe_new = recipes.update().where(recipes.c.id == recipe_id).values(*recipe_list)
+    g = await database.execute(recipe_new)
+    return recipe_list
