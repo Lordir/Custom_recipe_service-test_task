@@ -104,6 +104,41 @@ async def get_list_top_user():
     return final_list
 
 
+async def top_users_likes():
+    get_data = await database.fetch_all(query=users.select().where(users.c.is_active == True))
+
+    users_list = [dict(result) for result in get_data]
+
+    users_dict = {}
+    for user in users_list:
+        user_id = user['id']
+        number_of_recipes = await get_recipe_list_user(user_id)
+        number_of_likes = 0
+        for like in number_of_recipes:
+            number_of_likes += like['likes']
+        users_dict[user_id] = {
+            'user_id': user['id'],
+            'username': user['username'],
+            'is_active': user['is_active'],
+            'number_of_likes': number_of_likes
+        }
+    sorted_tuples = sorted(users_dict.items(), key=lambda item: item[1]['number_of_likes'], reverse=True)
+    sorted_users_dict = {key: value for key, value in sorted_tuples}
+    final_list = []
+    if len(sorted_users_dict) < 10:
+        i = len(sorted_users_dict)
+    else:
+        i = 10
+    for user_id, user in sorted_users_dict.items():
+        if i == 0:
+            break
+        else:
+            final_list.append(user)
+            i -= 1
+
+    return final_list
+
+
 async def block_users(user_id: int):
     user = await database.fetch_all(query=users.select().where(users.c.id == user_id))
     user_list = [dict(result) for result in user]
