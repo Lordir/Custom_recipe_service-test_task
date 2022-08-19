@@ -1,6 +1,8 @@
 from models.database import database
 from models.recipes import recipes
 from schemas import recipes as recipe_schema
+from operator import itemgetter
+from fastapi import HTTPException, status
 
 
 async def add_recipes(recipe: recipe_schema.RecipeModel, user):
@@ -19,3 +21,104 @@ async def add_recipes(recipe: recipe_schema.RecipeModel, user):
     recipe_id = await database.fetch_one(query)
     id_r = dict(zip(recipe_id, recipe_id.values()))
     return {"id": id_r['id'], "user": user["username"], **recipe.dict()}
+
+
+async def get_list_recipes():
+    get_data = await database.fetch_all(query=recipes.select().where(recipes.c.is_active == True))
+    recipes_list = [dict(result) for result in get_data]
+    list_keys = [key for key in recipes_list[0].keys()]
+    list_keys.pop(7)
+    recipes_list_without_cooking_steps = [
+        {key: value for key, value in item.items() if key in list_keys} for
+        item
+        in recipes_list]
+    return recipes_list_without_cooking_steps
+
+
+async def get_list_recipes_with_pagination(number: int):
+    if number < 1:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Only positive number",
+        )
+    recipes_list = await get_list_recipes()
+    if (number - 1) * 10 > len(recipes_list):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Page does not exist",
+        )
+    else:
+        recipes_list_new = recipes_list[(number - 1) * 10:number * 10]
+        return recipes_list_new
+
+
+async def get_list_recipes_sort_likes():
+    recipes_list = await get_list_recipes()
+    recipes_list.sort(key=itemgetter('likes'), reverse=True)
+    return recipes_list
+
+
+async def get_list_recipes_sort_likes_with_pagination(number: int):
+    if number < 1:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Only positive number",
+        )
+    recipes_list = await get_list_recipes()
+    recipes_list.sort(key=itemgetter('likes'), reverse=True)
+    if (number - 1) * 10 > len(recipes_list):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Page does not exist",
+        )
+    else:
+        recipes_list_new = recipes_list[(number - 1) * 10:number * 10]
+        return recipes_list_new
+
+
+async def get_list_recipes_sort_date():
+    recipes_list = await get_list_recipes()
+    recipes_list.sort(key=itemgetter('created_on'), reverse=True)
+    return recipes_list
+
+
+async def get_list_recipes_sort_date_with_pagination(number: int):
+    if number < 1:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Only positive number",
+        )
+    recipes_list = await get_list_recipes()
+    recipes_list.sort(key=itemgetter('created_on'), reverse=True)
+    if (number - 1) * 10 > len(recipes_list):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Page does not exist",
+        )
+    else:
+        recipes_list_new = recipes_list[(number - 1) * 10:number * 10]
+        return recipes_list_new
+
+
+async def get_list_recipes_sort_name():
+    recipes_list = await get_list_recipes()
+    recipes_list.sort(key=itemgetter('title'))
+    return recipes_list
+
+
+async def get_list_recipes_sort_name_with_pagination(number: int):
+    if number < 1:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Only positive number",
+        )
+    recipes_list = await get_list_recipes()
+    recipes_list.sort(key=itemgetter('title'))
+    if (number - 1) * 10 > len(recipes_list):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Page does not exist",
+        )
+    else:
+        recipes_list_new = recipes_list[(number - 1) * 10:number * 10]
+        return recipes_list_new
