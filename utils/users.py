@@ -192,3 +192,14 @@ async def change_usernames(new_username: str, user_id: int):
     user_new = users.update().where(users.c.id == user_id).values(*user_list)
     g = await database.execute(user_new)
     return user_list
+
+
+async def delete_users(user_id: int):
+    list_recipes = await get_recipe_list_user(user_id)
+    for recipe in list_recipes:
+        g = recipes.delete().where(recipes.c.id == recipe['id'])
+        h = await database.execute(g)
+    token = tokens.delete().where(tokens.c.user_id == user_id)
+    n = await database.execute(token)
+    user = users.delete().where(users.c.id == user_id)
+    return await database.execute(user)
