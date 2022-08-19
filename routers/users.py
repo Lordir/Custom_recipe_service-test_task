@@ -4,8 +4,10 @@ from utils import users as users_utils
 from fastapi.security import OAuth2PasswordRequestForm
 from utils.dependecies import get_current_user
 from utils.users import get_recipe_list_user, get_list_top_user
+from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
 
 
 @router.post("/sign-up", response_model=users.User)
@@ -32,9 +34,10 @@ async def auth(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get("/user_profile", response_model=users.UserProfile)
-async def user_profile(current_user: users.User = Depends(get_current_user)):
-    recipe_list = await get_recipe_list_user(dict(current_user)['user_id'])
-    data = dict(current_user)
+async def user_profile(token=Depends(oauth2_scheme)):
+    user = await users_utils.get_user_by_token(token)
+    recipe_list = await get_recipe_list_user(dict(user)['user_id'])
+    data = dict(user)
     data['number_of_recipes'] = len(recipe_list)
     return data
 
