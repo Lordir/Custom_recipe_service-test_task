@@ -181,3 +181,14 @@ async def unblock_recipes(recipe_id: int):
     recipe_new = recipes.update().where(recipes.c.id == recipe_id).values(*recipe_list)
     g = await database.execute(recipe_new)
     return recipe_list
+
+
+async def change_usernames(new_username: str, user_id: int):
+    user = await database.fetch_all(query=users.select().where(users.c.id == user_id))
+    user_list = [dict(result) for result in user]
+    for i in user_list:
+        i['username'] = new_username
+        i['updated_on'] = func.now()
+    user_new = users.update().where(users.c.id == user_id).values(*user_list)
+    g = await database.execute(user_new)
+    return user_list

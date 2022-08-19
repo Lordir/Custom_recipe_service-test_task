@@ -4,7 +4,7 @@ from utils import users as users_utils
 from fastapi.security import OAuth2PasswordRequestForm
 from utils.dependecies import get_current_user, get_admin_user
 from utils.users import get_recipe_list_user, get_list_top_user, block_users, unblock_users, block_recipes, \
-    unblock_recipes, top_users_likes
+    unblock_recipes, top_users_likes, change_usernames
 from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter()
@@ -83,3 +83,9 @@ async def block_recipe(recipe_id: int, current_user: users.User = Depends(get_ad
 async def unblock_recipe(recipe_id: int, current_user: users.User = Depends(get_admin_user)):
     recipe = await unblock_recipes(recipe_id)
     return recipe
+
+
+@router.post("/change_username/{new_username}")
+async def change_username(new_username: str, current_user: users.User = Depends(get_current_user)):
+    user = await change_usernames(new_username, dict(current_user)['user_id'])
+    return user
