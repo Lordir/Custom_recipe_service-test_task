@@ -70,3 +70,34 @@ async def get_user_by_token(token: str):
 async def get_recipe_list_user(user_id: int):
     recipe_list = await database.fetch_all(query=recipes.select().where(recipes.c.user_id == user_id))
     return [dict(result) for result in recipe_list]
+
+
+async def get_list_top_user():
+    get_data = await database.fetch_all(query=users.select().where(users.c.is_active == True))
+    users_list = [dict(result) for result in get_data]
+    print(users_list)
+    users_dict = {}
+    for user in users_list:
+        user_id = user['id']
+        number_of_recipes = await get_recipe_list_user(user_id)
+        users_dict[user_id] = {
+            'user_id': user['id'],
+            'username': user['username'],
+            'is_active': user['is_active'],
+            'number_of_recipes': len(number_of_recipes)
+        }
+    sorted_tuples = sorted(users_dict.items(), key=lambda item: item[1]['number_of_recipes'], reverse=True)
+    sorted_users_dict = {key: value for key, value in sorted_tuples}
+    final_list = []
+    if len(sorted_users_dict) < 10:
+        i = len(sorted_users_dict)
+    else:
+        i = 10
+    for user_id, user in sorted_users_dict.items():
+        if i == 0:
+            break
+        else:
+            final_list.append(user)
+            i -= 1
+
+    return final_list

@@ -3,7 +3,7 @@ from schemas import users
 from utils import users as users_utils
 from fastapi.security import OAuth2PasswordRequestForm
 from utils.dependecies import get_current_user
-from utils.users import get_recipe_list_user
+from utils.users import get_recipe_list_user, get_list_top_user
 
 router = APIRouter()
 
@@ -37,3 +37,9 @@ async def user_profile(current_user: users.User = Depends(get_current_user)):
     data = dict(current_user)
     data['number_of_recipes'] = len(recipe_list)
     return data
+
+
+@router.get("/top_users")
+async def user_profile(current_user: users.User = Depends(get_current_user)):
+    users_list = await get_list_top_user()
+    return users_list
