@@ -3,6 +3,7 @@ from models.recipes import recipes
 from schemas import recipes as recipe_schema
 from operator import itemgetter
 from fastapi import HTTPException, status
+from sqlalchemy.sql import func
 
 
 async def add_recipes(recipe: recipe_schema.RecipeModel, user):
@@ -26,6 +27,17 @@ async def add_recipes(recipe: recipe_schema.RecipeModel, user):
 async def get_recipes(recipe_id: int):
     recipe_list = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
     return [dict(result) for result in recipe_list]
+
+
+async def like_recipes(recipe_id: int):
+    recipe_list = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
+    recipe_list = [dict(result) for result in recipe_list]
+    for i in recipe_list:
+        i['likes'] += 1
+        i['updated_on'] = func.now()
+    recipe_new = recipes.update().where(recipes.c.id == recipe_id).values(*recipe_list)
+    g = await database.execute(recipe_new)
+    return recipe_list
 
 
 async def get_list_recipes():

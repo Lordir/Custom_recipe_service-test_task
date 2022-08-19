@@ -19,6 +19,12 @@ async def get_recipe(recipe_id: int, current_user: User = Depends(get_current_us
     return recipe
 
 
+@router.get("/get_recipe/{recipe_id}/like")
+async def like_recipe(recipe_id: int, current_user: User = Depends(get_current_user)):
+    recipe = await like_recipes(recipe_id)
+    return recipe
+
+
 @router.get("/get_list_recipe")
 async def get_list_recipe(current_user: User = Depends(get_current_user)):
     recipe_list = await get_list_recipes()
