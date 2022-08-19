@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from models.database import database
-from routers import users
+from routers import users, recipes
 
 app = FastAPI()
 
@@ -16,3 +16,4 @@ async def shutdown():
 
 
 app.include_router(users.router)
+app.include_router(recipes.router)
