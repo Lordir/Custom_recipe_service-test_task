@@ -6,6 +6,7 @@ from models.users import users, tokens
 from schemas import users as user_schema
 from datetime import datetime
 from sqlalchemy import and_
+from models.recipes import recipes
 
 
 def get_random_string(length=12):
@@ -64,3 +65,8 @@ async def get_user_by_token(token: str):
         )
     )
     return await database.fetch_one(query)
+
+
+async def get_recipe_list_user(user_id: int):
+    recipe_list = await database.fetch_all(query=recipes.select().where(recipes.c.user_id == user_id))
+    return [dict(result) for result in recipe_list]

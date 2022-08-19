@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from schemas import users
 from utils import users as users_utils
 from fastapi.security import OAuth2PasswordRequestForm
+from utils.dependecies import get_current_user
+from utils.users import get_recipe_list_user
 
 router = APIRouter()
 
@@ -27,3 +29,11 @@ async def auth(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     return await users_utils.create_user_token(user_id=user["id"])
+
+
+@router.get("/user_profile", response_model=users.UserProfile)
+async def user_profile(current_user: users.User = Depends(get_current_user)):
+    recipe_list = await get_recipe_list_user(dict(current_user)['user_id'])
+    data = dict(current_user)
+    data['number_of_recipes'] = len(recipe_list)
+    return data

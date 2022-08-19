@@ -28,3 +28,10 @@ class UserBase(BaseModel):
 
 class User(UserBase):
     token: TokenBase = {}
+
+
+class UserProfile(BaseModel):
+    user_id: int
+    username: str
+    is_active: bool
+    number_of_recipes: int
