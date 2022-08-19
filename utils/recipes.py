@@ -169,3 +169,17 @@ async def change_recipes(recipe: recipe_schema.RecipeModel, recipe_id: int, user
     recipe_new = recipes.update().where(recipes.c.id == recipe_id).values(*recipe_list)
     g = await database.execute(recipe_new)
     return recipe_list
+
+
+async def delete_recipes(recipe_id: int, user_id: int):
+    data = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
+    recipe_list = [dict(result) for result in data]
+    for item in recipe_list:
+        if item['id'] == recipe_id and item['user_id'] == user_id:
+            recipe = recipes.delete().where(recipes.c.id == recipe_id)
+            return await database.execute(recipe)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not your recipe",
+            )
