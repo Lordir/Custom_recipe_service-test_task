@@ -1,8 +1,18 @@
 from fastapi import FastAPI
+from models.database import database
+from routers import users
 
 app = FastAPI()
 
 
-@app.get("/")
-async def home():
-    return {"Hello": "World"}
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+
+
+app.include_router(users.router)

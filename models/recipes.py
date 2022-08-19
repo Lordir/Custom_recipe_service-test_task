@@ -1,7 +1,7 @@
 import enum
 import sqlalchemy
 from sqlalchemy import MetaData, Column, Table, Integer, String, Boolean, Enum, DateTime, ForeignKey, Text
-from datetime import datetime
+from sqlalchemy.sql import func
 from models.users import users
 
 metadata = MetaData()
@@ -14,8 +14,8 @@ class MyEnum2(enum.Enum):
 recipes = Table("recipes", metadata,
                 Column("id", Integer, primary_key=True),
                 Column("user_id", ForeignKey(users.c.id)),
-                Column("created_on", DateTime(), default=datetime.now),
-                Column("updated_on", DateTime(), default=datetime.now, onupdate=datetime.now),
+                Column("created_on", DateTime(timezone=True), server_default=func.now()),
+                Column("updated_on", DateTime(timezone=True), onupdate=func.now()),
                 Column("title", String, index=True),
                 Column("type_dish", String, index=True),
                 Column("description", Text, index=True),

@@ -1,8 +1,8 @@
 """Added required tables
 
-Revision ID: 09e25b4de409
+Revision ID: cd55fb5bb1df
 Revises: 
-Create Date: 2022-08-18 14:13:44.400612
+Create Date: 2022-08-19 15:39:28.849840
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '09e25b4de409'
+revision = 'cd55fb5bb1df'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,8 +24,8 @@ def upgrade() -> None:
     sa.Column('hashed_password', sa.String(), nullable=True),
     sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=False),
     sa.Column('favorites', sa.Enum('one', name='myenum'), nullable=True),
-    sa.Column('created_on', sa.DateTime(), nullable=True),
-    sa.Column('updated_on', sa.DateTime(), nullable=True),
+    sa.Column('created_on', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_on', sa.DateTime(timezone=True), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
@@ -41,8 +41,8 @@ def upgrade() -> None:
     op.create_table('recipes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('created_on', sa.DateTime(), nullable=True),
-    sa.Column('updated_on', sa.DateTime(), nullable=True),
+    sa.Column('created_on', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_on', sa.DateTime(timezone=True), nullable=True),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('type_dish', sa.String(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),

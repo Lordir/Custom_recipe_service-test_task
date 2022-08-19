@@ -2,7 +2,7 @@ import enum
 import sqlalchemy
 from sqlalchemy import MetaData, Column, Table, Integer, String, Boolean, Enum, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime
+from sqlalchemy.sql import func
 
 metadata = MetaData()
 
@@ -22,8 +22,8 @@ users = Table("users", metadata,
                   nullable=False,
               ),
               Column("favorites", Enum(MyEnum)),
-              Column("created_on", DateTime(), default=datetime.now),
-              Column("updated_on", DateTime(), default=datetime.now, onupdate=datetime.now)
+              Column("created_on", DateTime(timezone=True), server_default=func.now()),
+              Column("updated_on", DateTime(timezone=True), onupdate=func.now()),
 
               )
 
