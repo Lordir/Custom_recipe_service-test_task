@@ -1,5 +1,6 @@
 from models.database import database
 from models.recipes import recipes
+from models.users import users
 from schemas import recipes as recipe_schema
 from operator import itemgetter
 from fastapi import HTTPException, status
@@ -49,6 +50,14 @@ async def get_list_recipes():
         {key: value for key, value in item.items() if key in list_keys} for
         item
         in recipes_list]
+
+    for recipe in recipes_list_without_cooking_steps:
+        user = await database.fetch_all(query=users.select().where(users.c.id == recipe['user_id']))
+        user_dict = [dict(result) for result in user]
+        username = user_dict[0]['username']
+        is_active = user_dict[0]['is_active']
+        recipe['author'] = username
+        recipe['is_active_author'] = is_active
     return recipes_list_without_cooking_steps
 
 
