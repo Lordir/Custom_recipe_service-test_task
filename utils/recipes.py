@@ -23,6 +23,11 @@ async def add_recipes(recipe: recipe_schema.RecipeModel, user):
     return {"id": id_r['id'], "user": user["username"], **recipe.dict()}
 
 
+async def get_recipes(recipe_id: int):
+    recipe_list = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
+    return [dict(result) for result in recipe_list]
+
+
 async def get_list_recipes():
     get_data = await database.fetch_all(query=recipes.select().where(recipes.c.is_active == True))
     recipes_list = [dict(result) for result in get_data]
