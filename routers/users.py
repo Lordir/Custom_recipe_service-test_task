@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from schemas import users
 from utils import users as users_utils
 from fastapi.security import OAuth2PasswordRequestForm
-from utils.dependecies import get_current_user
-from utils.users import get_recipe_list_user, get_list_top_user
+from utils.dependecies import get_current_user, get_admin_user
+from utils.users import get_recipe_list_user, get_list_top_user, block_users, unblock_users
 from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter()
@@ -46,3 +46,21 @@ async def user_profile(token=Depends(oauth2_scheme)):
 async def user_profile(current_user: users.User = Depends(get_current_user)):
     users_list = await get_list_top_user()
     return users_list
+
+
+@router.get("/top_users")
+async def user_profile(current_user: users.User = Depends(get_current_user)):
+    users_list = await get_list_top_user()
+    return users_list
+
+
+@router.get("/admin/block_user/{user_id}")
+async def block_user(user_id: int, current_user: users.User = Depends(get_admin_user)):
+    user = await block_users(user_id)
+    return user
+
+
+@router.get("/admin/unblock_user/{user_id}")
+async def unblock_user(user_id: int, current_user: users.User = Depends(get_admin_user)):
+    user = await unblock_users(user_id)
+    return user

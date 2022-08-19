@@ -7,6 +7,7 @@ from schemas import users as user_schema
 from datetime import datetime
 from sqlalchemy import and_
 from models.recipes import recipes
+from sqlalchemy.sql import func
 
 
 def get_random_string(length=12):
@@ -101,3 +102,25 @@ async def get_list_top_user():
             i -= 1
 
     return final_list
+
+
+async def block_users(user_id: int):
+    user = await database.fetch_all(query=users.select().where(users.c.id == user_id))
+    user_list = [dict(result) for result in user]
+    for i in user_list:
+        i['is_active'] = False
+        i['updated_on'] = func.now()
+    user_new = users.update().where(users.c.id == user_id).values(*user_list)
+    g = await database.execute(user_new)
+    return user_list
+
+
+async def unblock_users(user_id: int):
+    user = await database.fetch_all(query=users.select().where(users.c.id == user_id))
+    user_list = [dict(result) for result in user]
+    for i in user_list:
+        i['is_active'] = True
+        i['updated_on'] = func.now()
+    user_new = users.update().where(users.c.id == user_id).values(*user_list)
+    g = await database.execute(user_new)
+    return user_list
