@@ -3,7 +3,8 @@ from schemas import users
 from utils import users as users_utils
 from fastapi.security import OAuth2PasswordRequestForm
 from utils.dependecies import get_current_user, get_admin_user
-from utils.users import get_recipe_list_user, get_list_top_user, block_users, unblock_users
+from utils.users import get_recipe_list_user, get_list_top_user, block_users, unblock_users, block_recipes, \
+    unblock_recipes
 from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter()
@@ -64,3 +65,15 @@ async def block_user(user_id: int, current_user: users.User = Depends(get_admin_
 async def unblock_user(user_id: int, current_user: users.User = Depends(get_admin_user)):
     user = await unblock_users(user_id)
     return user
+
+
+@router.get("/admin/block_recipe/{recipe_id}")
+async def block_recipe(recipe_id: int, current_user: users.User = Depends(get_admin_user)):
+    recipe = await block_recipes(recipe_id)
+    return recipe
+
+
+@router.get("/admin/unblock_recipe/{recipe_id}")
+async def unblock_recipe(recipe_id: int, current_user: users.User = Depends(get_admin_user)):
+    recipe = await unblock_recipes(recipe_id)
+    return recipe

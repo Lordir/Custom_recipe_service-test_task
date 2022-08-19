@@ -124,3 +124,25 @@ async def unblock_users(user_id: int):
     user_new = users.update().where(users.c.id == user_id).values(*user_list)
     g = await database.execute(user_new)
     return user_list
+
+
+async def block_recipes(recipe_id: int):
+    recipe = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
+    recipe_list = [dict(result) for result in recipe]
+    for i in recipe_list:
+        i['is_active'] = False
+        i['updated_on'] = func.now()
+    recipe_new = recipes.update().where(recipes.c.id == recipe_id).values(*recipe_list)
+    g = await database.execute(recipe_new)
+    return recipe_list
+
+
+async def unblock_recipes(recipe_id: int):
+    recipe = await database.fetch_all(query=recipes.select().where(recipes.c.id == recipe_id))
+    recipe_list = [dict(result) for result in recipe]
+    for i in recipe_list:
+        i['is_active'] = True
+        i['updated_on'] = func.now()
+    recipe_new = recipes.update().where(recipes.c.id == recipe_id).values(*recipe_list)
+    g = await database.execute(recipe_new)
+    return recipe_list
